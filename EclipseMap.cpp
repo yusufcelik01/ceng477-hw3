@@ -2,6 +2,8 @@
 
 using namespace std;
 
+
+
 struct vertex {
     glm::vec3 position;
     glm::vec3 normal;
@@ -25,6 +27,38 @@ struct triangle {
                                                                            vertex3(vertex3) {}
 };
 
+struct sphare
+{
+    int horizantal, vertical, vecsize;
+    vertex *vertices;
+    double radius;
+    glm::vec3 center;
+
+    sphare(){}
+    sphare(const glm::vec3 center, const double radius, const int horizantal, const int vertical){
+        this->center = center;
+        this->radius = radius;
+        this->horizantal = horizantal;
+        this->vertical = vertical;
+        this->vecsize = this->horizantal*this->vertical+2;
+        this->vertices = new vertex[vecsize];
+    }
+    void calculate(){
+        glm::vec3 tmp(0.0f,1.0f,0.0f);
+        glm::vec3 up = center + tmp*radius;
+        int index = 0;
+        for (int i=0; i<vertical;i++){
+            double beta = PI*((double)i/vertical);
+            for(int j=0; j<horizantal;j++){
+                double alpha = 2*PI*((double)j/horizantal);
+                glm::vec3 ver(radius*sin(beta)*cos(alpha),radius*sin(beta)*sin(alpha),radius*cos(beta));
+                vertices[index].position = ver;
+                index++;
+            }
+        }
+    }
+};
+
 void EclipseMap::Render(const char *coloredTexturePath, const char *greyTexturePath, const char *moonTexturePath) {
     // Open window
     GLFWwindow *window = openWindow(windowName, screenWidth, screenHeight);
@@ -37,9 +71,16 @@ void EclipseMap::Render(const char *coloredTexturePath, const char *greyTextureP
 
     
     // TODO: Set moonVertices
+    glm::vec3 centerMoon(0,2600,0);
+    sphare moon(centerMoon,162,250,125);
+    moon.calculate();
+
     
     // TODO: Configure Buffers
-    
+    GLuint moonVertexBuffer;
+    glGenBuffers(1, &moonVertexBuffer);
+    glBindBuffer(GL_ARRAY_BUFFER, moonVertexBuffer);
+    glBufferData(GL_ARRAY_BUFFER, moon.vecsize, moon.vertices, GL_STATIC_DRAW);
 
     // World commands
     // Load shaders
@@ -82,6 +123,10 @@ void EclipseMap::Render(const char *coloredTexturePath, const char *greyTextureP
         // TODO: Bind moon vertex array        
 
         // TODO: Draw moon object
+        glEnableVertexAttribArray(0);
+        glBindBuffer(GL_ARRAY_BUFFER,moonVertexBuffer);
+        glVertexAttribPointer(0, moon.vecsize, GL_FLOAT, GL_FALSE, 0, (void*)0);
+        glDrawArrays(GL_TRIANGLES, 0, moon.vecsize);
         
         /*************************/
 
