@@ -1,0 +1,13 @@
+*
+*.*
+**/**/*
+!*.cpp
+!*.h
+!*.hpp
+!*.c
+!Makefile
+!.gitignore
+!*.frag
+!*.vert
+!glm
+!glm/**/*
