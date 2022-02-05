@@ -2,8 +2,6 @@
 
 using namespace std;
 
-
-
 struct vertex {
     glm::vec3 position;
     glm::vec3 normal;
@@ -27,37 +25,104 @@ struct triangle {
                                                                            vertex3(vertex3) {}
 };
 
-struct sphare
-{
-    int horizantal, vertical, vecsize;
-    vertex *vertices;
-    double radius;
-    glm::vec3 center;
+//float earthVertices[] = {
+//    -0.5f, -0.5f, 0.0f,
+//     0.5f, -0.5f, 0.0f,
+//     0.0f,  0.5f, 0.0f
+//};
 
-    sphare(){}
-    sphare(const glm::vec3 center, const double radius, const int horizantal, const int vertical){
-        this->center = center;
-        this->radius = radius;
-        this->horizantal = horizantal;
-        this->vertical = vertical;
-        this->vecsize = this->horizantal*this->vertical+2;
-        this->vertices = new vertex[vecsize];
-    }
-    void calculate(){
-        glm::vec3 tmp(0.0f,1.0f,0.0f);
-        glm::vec3 up = center + tmp*radius;
-        int index = 0;
-        for (int i=0; i<vertical;i++){
-            double beta = PI*((double)i/vertical);
-            for(int j=0; j<horizantal;j++){
-                double alpha = 2*PI*((double)j/horizantal);
-                glm::vec3 ver(radius*sin(beta)*cos(alpha),radius*sin(beta)*sin(alpha),radius*cos(beta));
-                vertices[index].position = ver;
-                index++;
-            }
+
+//unsigned int indices[] = {
+//    0, 1, 2
+//};
+
+void createSphereArrays(vertex* vertexArray, vector<triangle>& indexArray, 
+        float radius, glm::vec3 center, glm::vec3 up,
+        int horizontalSplitCount, int verticalSplitCount)
+{
+    int numberOfVertices = (verticalSplitCount -1) *horizontalSplitCount  + 2;
+    //up = glm::normalize(up);
+    up = glm::vec3(0.0f, 0.0f, 1.0f);
+
+    
+    //vertexArray = new vertex[numberOfVertices];
+    //TODO alloc triangles
+
+    //north pole
+    vertexArray[0].position = center + radius * up;
+    vertexArray[0].texture = glm::vec2(0.f, 0.f);
+
+    vertexArray[1].position = center - radius * up;
+    vertexArray[1].texture = glm::vec2(0.f, 1.f);
+
+    size_t index = 2;
+    //for(int i=0 ; i < verticalSplitCount; i++){
+    //    double beta = PI * ((double)i/ verticalSplitCount);
+    //    for(int j=1; j< horizontalSplitCount; j++){
+    //        double alpha = 2*PI * ((double)j/ horizontalSplitCount); 
+    //        glm::vec3 ver(radius*sin(beta)*cos(alpha), 
+    //                            radius*sin(beta) * sin(alpha),
+    //                            radius*cos(beta));        
+    //        vertexArray[index++].position = ver;
+    //    }
+    //}
+
+    for(int i=0; i < horizontalSplitCount; i++){// for each meridian
+        double alpha = 2*PI * ((double)i /horizontalSplitCount);
+        for(int j=1; j < verticalSplitCount; j++){
+            double beta = PI * ((double)j/verticalSplitCount);
+            glm::vec3 ver(radius*sin(beta)*cos(alpha), 
+                                radius*sin(beta) * sin(alpha),
+                                radius*cos(beta));        
+            vertexArray[index].position = ver;
+
+            glm::vec2 tex((double)i /horizontalSplitCount, (double)j/verticalSplitCount);
+            
+            vertexArray[index].texture = tex;
+
+            index++;
         }
     }
-};
+    //cout << "index: " << index << endl;
+
+
+    vector<triangle>* triangles = new vector<triangle>;
+    
+    for(size_t i=1; i < horizontalSplitCount; i++){
+        size_t index = (verticalSplitCount -1) *i + 2;
+        if(i == horizontalSplitCount-1){
+            triangles->push_back(triangle(0, 2, index));
+            //TODO
+            triangles->push_back(triangle(index+verticalSplitCount -2, verticalSplitCount, 1));
+        } 
+        triangles->push_back(triangle(0, index, index- (verticalSplitCount-1)));
+
+        index--;//for south pole
+        triangles->push_back(triangle(index, index + (verticalSplitCount-1), 1));
+    }
+
+    for(size_t i=1; i <horizontalSplitCount; i++){
+        size_t index = i* (verticalSplitCount-1) +2;
+        for(size_t j=1; j< verticalSplitCount; j++){
+            triangles->push_back(triangle(index, index+1, index-(verticalSplitCount-1)));
+            triangles->push_back(triangle(index+1, index-verticalSplitCount+2,index- verticalSplitCount +1));
+
+            if(i== horizontalSplitCount-1){
+                triangles->push_back(triangle(j, j+1, index));
+                triangles->push_back(triangle(j+1, index+1, index));
+                //cout << "edge case meridian \n";
+            }
+        
+            index++;
+        }
+    
+    }
+
+    
+    indexArray = *triangles;
+}
+
+
 
 void EclipseMap::Render(const char *coloredTexturePath, const char *greyTexturePath, const char *moonTexturePath) {
     // Open window
@@ -71,25 +136,111 @@ void EclipseMap::Render(const char *coloredTexturePath, const char *greyTextureP
 
     
     // TODO: Set moonVertices
-    glm::vec3 centerMoon(0,2600,0);
-    sphare moon(centerMoon,162,250,125);
-    moon.calculate();
-
     
     // TODO: Configure Buffers
-    GLuint moonVertexBuffer;
-    glGenBuffers(1, &moonVertexBuffer);
-    glBindBuffer(GL_ARRAY_BUFFER, moonVertexBuffer);
-    glBufferData(GL_ARRAY_BUFFER, moon.vecsize, moon.vertices, GL_STATIC_DRAW);
+    
 
     // World commands
     // Load shaders
-    GLuint worldShaderID = initShaders("worldShader.vert", "worldShader.frag");
+    //GLuint worldShaderID = initShaders("worldShader.vert", "worldShader.frag");
+    GLuint worldShaderID = initShaders("testWorld.vert", "testWorld.frag");
 
     initColoredTexture(coloredTexturePath, worldShaderID);
     initGreyTexture(greyTexturePath, worldShaderID);
 
     // TODO: Set worldVertices
+    size_t numberOfEarthVertices = (verticalSplitCount -1) *horizontalSplitCount  + 2;
+    vertex earthVertices[numberOfEarthVertices];
+    //triangle* indices = NULL;
+    vector<triangle> indices;
+
+    createSphereArrays( earthVertices, indices, radius, glm::vec3(0.f, 0.f, 0.f), glm::vec3(0.f, 0.f, -1.f),
+                            horizontalSplitCount, verticalSplitCount);
+
+    //for(size_t k=0; k< numberOfEarthVertices; k++){
+    //    glm::vec3 v = earthVertices[k].position;
+    //    cout << v.x << " " << v.y << " " << v.z << endl;
+    //}
+
+    //for(size_t k=0; k< indices.size(); k++){
+    //    triangle temps = indices[k];
+    //    cout << temps.vertex1 << " " << temps.vertex2 << " " << temps.vertex3 << endl;
+    //}
+
+
+    //vertex earthVertices[3];
+    ////earthVertices[0].position = glm::vec3(-0.5f, -0.5f, 0.0f);
+    ////earthVertices[1].position = glm::vec3( 0.5f, -0.5f, 0.0f);
+    ////earthVertices[2].position = glm::vec3( 0.0f,  0.5f, 0.0f);
+
+    //earthVertices[0].position = glm::vec3(-1000.f, -1000.f, 0.0f);
+    //earthVertices[1].position = glm::vec3( 1000.f, -1000.f, 0.0f);
+    //earthVertices[2].position = glm::vec3( 0.0f,  1000.f, 0.0f);
+
+    //earthVertices[0].texture = glm::vec2(0.0f, 0.0f);
+    //earthVertices[1].texture = glm::vec2(1.0f, 0.0f);
+    //earthVertices[2].texture = glm::vec2(0.5f, 1.0f);
+
+    //
+
+    //triangle indices[1];
+    //indices[0].vertex1 = 0;
+    //indices[0].vertex2 = 1;
+    //indices[0].vertex3 = 2;
+
+    //GLuint VBO;
+    glGenVertexArrays(1, &VAO);
+    glGenBuffers(1, &VBO);
+    glGenBuffers(1, &EBO);
+
+    glBindVertexArray(VAO);
+
+    //glBindBuffer(GL_ARRAY_BUFFER, VBO);
+    //glBufferData(GL_ARRAY_BUFFER, sizeof(earthVertices), earthVertices, GL_STATIC_DRAW);
+
+    //glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBO);
+    //glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(indices), &indices[0], GL_STATIC_DRAW);
+
+
+
+
+    //glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(earthVertices[0]), (void*) 0);
+    //glEnableVertexAttribArray(0);
+
+    //glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, sizeof(earthVertices[0]), (void*) (3*sizeof(float)));
+    //glEnableVertexAttribArray(1);
+
+    //glVertexAttribPointer(2, 3, GL_FLOAT, GL_FALSE, sizeof(earthVertices[0]), (void*) (6*sizeof(float)));
+    //glEnableVertexAttribArray(2);
+
+    ////////////////////////////
+    glBindBuffer(GL_ARRAY_BUFFER, VBO);
+    //glBufferData(GL_ARRAY_BUFFER, sizeof(vertex)*((horizontalSplitCount-1) * verticalSplitCount +2), earthVertices, GL_STATIC_DRAW);
+    glBufferData(GL_ARRAY_BUFFER, sizeof(earthVertices), earthVertices, GL_STATIC_DRAW);
+
+    //cout << "sizeof(earthVertices)= " << sizeof(earthVertices) << endl;
+    //cout << "sizeof(vertex)" << sizeof(vertex) << endl;
+    //cout << "numberOfEarthVertices" << numberOfEarthVertices << endl;
+    //cout << "indices.size()" << indices.size() << endl;
+
+    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBO);
+    glBufferData(GL_ELEMENT_ARRAY_BUFFER, indices.size()*sizeof(triangle) , &indices[0], GL_STATIC_DRAW);
+
+
+
+
+    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(vertex), (void*) 0);
+    glEnableVertexAttribArray(0);
+
+    glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, sizeof(vertex), (void*) (3*sizeof(float)));
+    glEnableVertexAttribArray(1);
+
+    glVertexAttribPointer(2, 3, GL_FLOAT, GL_FALSE, sizeof(vertex), (void*) (6*sizeof(float)));
+    glEnableVertexAttribArray(2);
+    //GLuint VAO;
+
+
+    //GLuint EBO;
     
     // TODO: Configure Buffers
     
@@ -97,12 +248,14 @@ void EclipseMap::Render(const char *coloredTexturePath, const char *greyTextureP
     glEnable(GL_DEPTH_TEST);
 
     // Main rendering loop
+    glm::vec3 rotAxis = glm::vec3(0.f, 1.f, -1.f);
+    float angle = 180;
     do {
         glViewport(0, 0, screenWidth, screenHeight);
 
         glClearStencil(0);
         glClearDepth(1.0f);
-        glClearColor(0, 0, 0, 1);
+        glClearColor(0, 0.0f, 0, 1);
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
 
 
@@ -117,28 +270,81 @@ void EclipseMap::Render(const char *coloredTexturePath, const char *greyTextureP
         // TODO: Use moonShaderID program
         
         // TODO: Update camera at every frame
+
+        glm::mat4 model = glm::mat4(1.0f);
+        model = glm::rotate(angle, rotAxis);
+        angle += 0.0003f;
+        //angle = 180;
+        //model = glm::scale(glm::mat4(1.0f), 
+        //               glm::vec3(1000.0f, 1000.0f, 1000.0f));
+
+        glm::mat4 view = glm::lookAt(
+                cameraPosition,
+                cameraPosition + cameraDirection,
+                cameraUp
+                //glm::vec3(0, 1, 0)
+        );
+
+        //glm::mat4 view = glm::lookAt(
+        //        glm::vec3(4,3,3), // Camera is at (4,3,3), in World Space
+        //        glm::vec3(0,0,0), // and looks at the origin
+        //        glm::vec3(0,1,0)
+        //);
+
+        glm::mat4 projection = glm::perspective(
+                glm::radians(projectionAngle),
+                aspectRatio,
+                near,
+                far
+        );
+
+        glm::mat4 MVP = projection * view * model;
+        
         
         // TODO: Update uniform variables at every frame
+
+
+
+
+
+        // TODO TODO TODO TODO TODO TODO
         
         // TODO: Bind moon vertex array        
 
         // TODO: Draw moon object
-        glEnableVertexAttribArray(0);
-        glBindBuffer(GL_ARRAY_BUFFER,moonVertexBuffer);
-        glVertexAttribPointer(0, moon.vecsize, GL_FLOAT, GL_FALSE, 0, (void*)0);
-        glDrawArrays(GL_TRIANGLES, 0, moon.vecsize);
         
         /*************************/
 
         // TODO: Use worldShaderID program
+        glUseProgram(worldShaderID);
         
         // TODO: Update camera at every frame
 
         // TODO: Update uniform variables at every frame
+        GLuint MVP_location;
+        MVP_location = glGetUniformLocation(worldShaderID, "MVP");
+
+        glUniformMatrix4fv(MVP_location, 1, GL_FALSE, &MVP[0][0]);
+        
+
+
+        
+
         
         // TODO: Bind world vertex array
         
         // TODO: Draw world object
+        glBindTexture(GL_TEXTURE_2D, textureColor);
+
+        glBindVertexArray(VAO);
+        glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBO);
+        glDrawElements(GL_TRIANGLES, indices.size()*3, GL_UNSIGNED_INT, 0);
+
+        //cout << "triangles drawn: " << indices.size() << endl;
+
+        //cout << indices.size() << endl;//TODO debug
+        //cout << verticalSplitCount * ((horizontalSplitCount-2)*2 +2) <<endl;
+        //glDrawArrays(GL_TRIANGLES, 0, 3);
         
 
         // Swap buffers and poll events

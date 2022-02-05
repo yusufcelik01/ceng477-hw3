@@ -44,8 +44,11 @@ private:
     float pitch = startPitch;
     float yaw = startYaw;
     float speed = startSpeed;
-    glm::vec3 cameraStartPosition = glm::vec3(0, 4000, 4000);
-    glm::vec3 cameraStartDirection = glm::vec3(0, -1, -1);
+    //glm::vec3 cameraStartPosition = glm::vec3(0, 4000, 4000);//TODO
+    glm::vec3 cameraStartPosition = glm::vec3(0, 1500, 1500);//TODO
+    //glm::vec3 cameraStartPosition = glm::vec3(2000, 2000, 0);//right
+    glm::vec3 cameraStartDirection = glm::vec3(0, -1, -1);//TODO
+    //glm::vec3 cameraStartDirection = glm::vec3(-1, -1, 0);//right
     glm::vec3 cameraStartUp = glm::vec3(0, 0, 1);
     glm::vec3 cameraUp = cameraStartUp;
     glm::vec3 cameraPosition = cameraStartPosition;
@@ -85,6 +88,10 @@ public:
     void initGreyTexture(const char *filename, GLuint shader);
 
     void initMoonColoredTexture(const char *filename, GLuint shader);
+
+
+    void computeEarthArrays();
+    void computeMoonArrays();
 
 };
 

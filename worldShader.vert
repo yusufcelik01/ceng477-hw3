@@ -45,5 +45,6 @@ void main()
    // set gl_Position variable correctly to give the transformed vertex position
 
 
-    gl_Position = vec4(0,0,0,0); // this is a placeholder. It does not correctly set the position
+    //gl_Position = vec4(0,0,0,0); // this is a placeholder. It does not correctly set the position
+    gl_Position = vec4(VertexPosition, 1); // this is a placeholder. It does not correctly set the position
 }
