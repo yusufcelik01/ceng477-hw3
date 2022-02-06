@@ -38,12 +38,18 @@ private:
     float aspectRatio = 1;
     float near = 0.1;
     float far = 10000;
-    float startPitch = 180;
-    float startYaw = 90;
+    //float startPitch = 180;
+    //float startYaw = 90;
+    float startPitch = 0;
+    float startYaw = 0;
     float startSpeed = 0;
     float pitch = startPitch;
     float yaw = startYaw;
     float speed = startSpeed;
+    float currentTime = 0;
+    float lastTime = 0;
+    float deltaTime = 0;
+
     glm::vec3 cameraStartPosition = glm::vec3(0, 4000, 4000);//TODO
     //glm::vec3 cameraStartPosition = glm::vec3(0, 1500, 1500);//TODO
     //glm::vec3 cameraStartPosition = glm::vec3(2000, 2000, 0);//right

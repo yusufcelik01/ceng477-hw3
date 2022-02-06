@@ -17,28 +17,59 @@ uniform float textureOffset;
 
 out vec4 FragColor;
 
-vec3 ambientReflectenceCoefficient = vec3(1.0f);
-vec3 ambientLightColor = vec3(1.0f);
-vec3 specularReflectenceCoefficient= vec3(1.0f);
-vec3 specularLightColor = vec3(1.0f);
-float SpecularExponent = 1;
-vec3 diffuseReflectenceCoefficient= vec3(1.0f);
-vec3 diffuseLightColor = vec3(1.0f);
+//vec3 ambientReflectenceCoefficient = vec3(1.0f);
+//vec3 ambientLightColor = vec3(1.0f);
+//vec3 specularReflectenceCoefficient= vec3(1.0f);
+//vec3 specularLightColor = vec3(1.0f);
+//float SpecularExponent = 1;
+//vec3 diffuseReflectenceCoefficient= vec3(1.0f);
+//vec3 diffuseLightColor = vec3(1.0f);
 
+vec3 ambientReflectenceCoefficient = vec3(0.5f, 0.5f, 0.5f);
+vec3 ambientLightColor = vec3(0.6f, 0.6f, 0.6f);
+vec3 specularReflectenceCoefficient = vec3(1.0f, 1.0f, 1.0f);
+vec3 specularLightColor = vec3(1.0f, 1.0f, 1.0f);
+float SpecularExponent = 10;
+vec3 diffuseReflectenceCoefficient= vec3(1.0f);
+vec3 diffuseLightColor = vec3(1.0f, 1.0f, 1.0f);
 
 void main()
 {
     // Calculate texture coordinate based on data.TexCoord
-    vec2 textureCoordinate = vec2(0, 0);
-    vec4 texColor = texture(TexColor, textureCoordinate);
-
-    vec3 ambient = vec3(0, 0, 0);    
-    vec3 diffuse = vec3(0, 0, 0);
-    vec3 spec = vec3(0, 0, 0);
-
-    //FragColor = vec4(ambient+diffuse+spec, 1.0f);
     
-    FragColor = vec4(1.0f, 1.0f, 1.0f, 1.0f);//TODO TEST
+    vec3 halfVector = normalize(LightVector + CameraVector);
+    float NdotL = dot(LightVector, data.Normal);
+    float NdotH = dot(halfVector, data.Normal);
+
+    vec4 pixelColor = texture(TexColor, data.TexCoord);
+    diffuseReflectenceCoefficient.x = pixelColor.x;
+    diffuseReflectenceCoefficient.y = pixelColor.y;
+    diffuseReflectenceCoefficient.z = pixelColor.z;
 
 
+
+    vec3 ambient = ambientLightColor * ambientReflectenceCoefficient;
+    vec3 diffuse = diffuseLightColor * diffuseReflectenceCoefficient
+                        * max(0, NdotL);
+
+    //vec3 diffuse = vec3(0, 0, 0);
+    //vec3 spec = vec3(0, 0, 0);
+    vec3 spec = specularLightColor * specularReflectenceCoefficient 
+                    * pow(max(0, NdotH), SpecularExponent);
+
+    //diffuse = vec3(0, 0, 0);
+    //spec = vec3(0, 0, 0);
+    
+
+
+
+    FragColor = vec4(ambient+diffuse+spec, 1.0f);
+    //FragColor = texture(TexColor, data.TexCoord);
+
+    //if(NdotL < 0){
+    //    FragColor = vec4(1.0f, 0.0f, 0.0f, 1.0f); 
+    //}
+    //if(NdotH < 0){
+    //    FragColor = vec4(1.0f, 1.0f, 0.0f, 1.0f); 
+    //}
 }

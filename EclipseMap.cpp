@@ -50,9 +50,11 @@ void createSphereArrays(vertex* vertexArray, vector<triangle>& indexArray,
 
     //north pole
     vertexArray[0].position = center + radius * up;
+    vertexArray[0].normal = up;
     vertexArray[0].texture = glm::vec2(0.f, 0.f);
 
     vertexArray[1].position = center - radius * up;
+    vertexArray[1].normal = -up;
     vertexArray[1].texture = glm::vec2(0.f, 1.f);
 
     size_t index = 2;
@@ -76,6 +78,12 @@ void createSphereArrays(vertex* vertexArray, vector<triangle>& indexArray,
                                 radius*cos(beta));        
             vertexArray[index].position = ver;
 
+            //calculate normal
+
+            glm::vec3 normal = ver - center;
+            vertexArray[index].normal = glm::normalize(normal);
+          
+            //calculate texture coordinates
             glm::vec2 tex((double)i /horizontalSplitCount, (double)j/verticalSplitCount);
             
             vertexArray[index].texture = tex;
@@ -142,8 +150,8 @@ void EclipseMap::Render(const char *coloredTexturePath, const char *greyTextureP
 
     // World commands
     // Load shaders
-    //GLuint worldShaderID = initShaders("worldShader.vert", "worldShader.frag");
-    GLuint worldShaderID = initShaders("testWorld.vert", "testWorld.frag");
+    GLuint worldShaderID = initShaders("worldShader.vert", "worldShader.frag");
+    //GLuint worldShaderID = initShaders("testWorld.vert", "testWorld.frag");
 
     initColoredTexture(coloredTexturePath, worldShaderID);
     initGreyTexture(greyTexturePath, worldShaderID);
@@ -237,19 +245,32 @@ void EclipseMap::Render(const char *coloredTexturePath, const char *greyTextureP
 
     glVertexAttribPointer(2, 3, GL_FLOAT, GL_FALSE, sizeof(vertex), (void*) (6*sizeof(float)));
     glEnableVertexAttribArray(2);
+
+    GLuint earth_MVP_location, earth_Model_location, heightFactor_location;
+    GLuint texColor_location, texGrey_location;
+    GLuint lightPosition_location, cameraPosition_location;
+
+    earth_Model_location = glGetUniformLocation(worldShaderID, "ModelMatrix");
+    earth_MVP_location = glGetUniformLocation(worldShaderID, "MVP");
+    heightFactor_location = glGetUniformLocation(worldShaderID, "heightFactor");
+    texColor_location = glGetUniformLocation(worldShaderID, "TexColor");
+    texGrey_location  = glGetUniformLocation(worldShaderID, "TexGrey");
+    lightPosition_location  = glGetUniformLocation(worldShaderID, "lightPosition");
+    cameraPosition_location  = glGetUniformLocation(worldShaderID, "cameraPosition");
+
     //GLuint VAO;
 
 
     //GLuint EBO;
-    
+
     // TODO: Configure Buffers
-    
+
     // Enable depth test
     glEnable(GL_DEPTH_TEST);
 
     // Main rendering loop
-    glm::vec3 rotAxis = glm::vec3(0.f, 1.f, -1.f);
-    float angle = 180;
+    glm::vec3 rotAxis = glm::vec3(0.f, 0.f, 1.f);
+    float earthRotationAngle = 0;
     yaw = 0;
     pitch = 0;
     do {
@@ -289,31 +310,26 @@ void EclipseMap::Render(const char *coloredTexturePath, const char *greyTextureP
         cameraLeft = yawMatrix * glm::vec4(cameraLeft, 1);
         cameraDirection = yawMatrix * glm::vec4(cameraDirection, 1);
 
+        cameraPosition += cameraDirection * speed;
+
         pitch = 0;
         yaw = 0;
 
 
         
 
+        // Calculate MVP
         glm::mat4 model = glm::mat4(1.0f);
-        model = glm::rotate(angle, rotAxis);
-        //angle += 0.0003f;
-        //angle = 180;
-        //model = glm::scale(glm::mat4(1.0f), 
-        //               glm::vec3(1000.0f, 1000.0f, 1000.0f));
+        model = glm::rotate(earthRotationAngle, rotAxis);
+        earthRotationAngle += 0.5/horizontalSplitCount;
+
 
         glm::mat4 view = glm::lookAt(
                 cameraPosition,
                 cameraPosition + cameraDirection,
                 cameraUp
-                //glm::vec3(0, 1, 0)
         );
 
-        //glm::mat4 view = glm::lookAt(
-        //        glm::vec3(4,3,3), // Camera is at (4,3,3), in World Space
-        //        glm::vec3(0,0,0), // and looks at the origin
-        //        glm::vec3(0,1,0)
-        //);
 
         glm::mat4 projection = glm::perspective(
                 glm::radians(projectionAngle),
@@ -345,10 +361,19 @@ void EclipseMap::Render(const char *coloredTexturePath, const char *greyTextureP
         // TODO: Update camera at every frame
 
         // TODO: Update uniform variables at every frame
-        GLuint MVP_location;
-        MVP_location = glGetUniformLocation(worldShaderID, "MVP");
 
-        glUniformMatrix4fv(MVP_location, 1, GL_FALSE, &MVP[0][0]);
+        //bind the uniform samplers to texture units:
+        glUniform1i(texColor_location, 0);
+        glUniform1i(texGrey_location,  1);
+
+        glUniformMatrix4fv(earth_Model_location, 1, GL_FALSE, &model[0][0]);
+        glUniformMatrix4fv(earth_MVP_location, 1, GL_FALSE, &MVP[0][0]);
+        glUniform1f(heightFactor_location, heightFactor);
+        glUniform3fv(cameraPosition_location, 1, &cameraPosition[0]);
+
+        glm::vec3 lightPosition = glm::vec3(0.f, 4000.f, 0.f);
+        glUniform3fv(lightPosition_location, 1, &lightPosition[0]);
+        //cout << "ERROR" << glGetError() << endl;
         
 
 
@@ -358,7 +383,11 @@ void EclipseMap::Render(const char *coloredTexturePath, const char *greyTextureP
         // TODO: Bind world vertex array
         
         // TODO: Draw world object
+
+        glActiveTexture(GL_TEXTURE0 + 0); // Texture unit 0
         glBindTexture(GL_TEXTURE_2D, textureColor);
+        glActiveTexture(GL_TEXTURE0 + 1); // Texture unit 1
+        glBindTexture(GL_TEXTURE_2D, textureGrey);
 
         glBindVertexArray(VAO);
         glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBO);
@@ -374,6 +403,11 @@ void EclipseMap::Render(const char *coloredTexturePath, const char *greyTextureP
         // Swap buffers and poll events
         glfwSwapBuffers(window);
         glfwPollEvents();
+
+        
+        deltaTime = (currentTime - lastTime) * 20;
+        lastTime = currentTime;
+        currentTime = glfwGetTime();
     } while (!glfwWindowShouldClose(window));
 
     // Delete buffers
@@ -395,15 +429,55 @@ void EclipseMap::Render(const char *coloredTexturePath, const char *greyTextureP
 }
 
 void EclipseMap::handleKeyPress(GLFWwindow *window) {
+    
+    
+
     if (glfwGetKey(window, GLFW_KEY_ESCAPE) == GLFW_PRESS) {
         glfwSetWindowShouldClose(window, GLFW_TRUE);
     }
+    //pitch and yaw
     if (glfwGetKey(window, GLFW_KEY_A) == GLFW_PRESS) {
-        yaw += 0.05;
+        yaw += 0.05*deltaTime;
     }
     if (glfwGetKey(window, GLFW_KEY_D) == GLFW_PRESS) {
-        yaw -= 0.05;
+        yaw -= 0.05*deltaTime;
     }
+    if (glfwGetKey(window, GLFW_KEY_W) == GLFW_PRESS) {
+        pitch += 0.05*deltaTime;
+    }
+    if (glfwGetKey(window, GLFW_KEY_S) == GLFW_PRESS) {
+        pitch -= 0.05*deltaTime;
+    }
+    //camera speed
+    if (glfwGetKey(window, GLFW_KEY_Y) == GLFW_PRESS) {
+        speed += 0.01*deltaTime * 3;
+    }
+    if (glfwGetKey(window, GLFW_KEY_H) == GLFW_PRESS) {
+        speed -= 0.01*deltaTime * 3;
+    }
+    if (glfwGetKey(window, GLFW_KEY_X) == GLFW_PRESS) {
+        speed = 0;
+    }
+    if (glfwGetKey(window, GLFW_KEY_I) == GLFW_PRESS) {
+        pitch = startPitch;
+        yaw = startYaw;
+        speed = startSpeed;
+
+        cameraPosition = cameraStartPosition;
+        cameraUp = cameraStartUp;
+        cameraDirection = cameraStartDirection;
+        cameraLeft = glm::cross(cameraUp, cameraDirection);
+    }
+    
+
+    //height map
+    if (glfwGetKey(window, GLFW_KEY_R) == GLFW_PRESS) {
+        heightFactor +=10 *deltaTime *3;
+    }
+    if (glfwGetKey(window, GLFW_KEY_F) == GLFW_PRESS) {
+        heightFactor -=10 *deltaTime *3;
+    }
+
 
 }
 

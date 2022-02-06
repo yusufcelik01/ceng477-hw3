@@ -10,6 +10,7 @@ uniform vec3 cameraPosition;
 uniform mat4 ProjectionMatrix;
 uniform mat4 ViewMatrix;
 uniform mat4 NormalMatrix;
+uniform mat4 ModelMatrix;
 uniform mat4 MVP;
 
 uniform sampler2D TexColor;
@@ -34,17 +35,22 @@ out vec3 CameraVector;// Vector from Vertex to Camera;
 void main()
 {
     
-    // Calculate texture coordinate based on data.TexCoord
-    vec2 textureCoordinate = vec2(0, 0);
-    vec4 texColor = texture(TexGrey, textureCoordinate);
-
-    // get texture value, compute height
-    // compute normal vector
+    vec4 heightMapValue = texture(TexGrey, VertexTex);
+    vec3 vertexHeight = VertexNormal*heightFactor* heightMapValue.r;
+    vec3 tempCoord = VertexPosition + vertexHeight;
 
 
-   // set gl_Position variable correctly to give the transformed vertex position
+    data.Position = (ModelMatrix * vec4(tempCoord, 1.0f)).xyz;
+    gl_Position = MVP * vec4(tempCoord, 1.0);
+    
+
+        
+    data.Normal = normalize(VertexNormal);
+    data.TexCoord = VertexTex;
 
 
-    //gl_Position = vec4(0,0,0,0); // this is a placeholder. It does not correctly set the position
-    gl_Position = vec4(VertexPosition, 1); // this is a placeholder. It does not correctly set the position
+    LightVector = lightPosition - data.Position;
+    LightVector = normalize(LightVector);
+    CameraVector = cameraPosition - data.Position;
+    CameraVector = normalize(CameraVector);
 }
