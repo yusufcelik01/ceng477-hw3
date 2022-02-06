@@ -250,6 +250,8 @@ void EclipseMap::Render(const char *coloredTexturePath, const char *greyTextureP
     // Main rendering loop
     glm::vec3 rotAxis = glm::vec3(0.f, 1.f, -1.f);
     float angle = 180;
+    yaw = 0;
+    pitch = 0;
     do {
         glViewport(0, 0, screenWidth, screenHeight);
 
@@ -265,15 +267,37 @@ void EclipseMap::Render(const char *coloredTexturePath, const char *greyTextureP
 
         // TODO: Manipulate rotation variables
         
+        
         // TODO: Bind textures
         
         // TODO: Use moonShaderID program
         
         // TODO: Update camera at every frame
+        cameraLeft = glm::cross(cameraUp, cameraDirection);
+        cameraLeft = glm::normalize(cameraLeft);
+        cameraUp = glm::cross(cameraDirection, cameraLeft);
+        cameraUp = glm::normalize(cameraUp);
+
+        glm::mat4 pitchMatrix = glm::rotate(pitch, cameraLeft);
+        
+        cameraDirection = pitchMatrix * glm::vec4(cameraDirection, 1);
+        cameraUp = pitchMatrix * glm::vec4(cameraUp, 1);
+        
+
+        glm::mat4 yawMatrix = glm::rotate(yaw, cameraUp);
+
+        cameraLeft = yawMatrix * glm::vec4(cameraLeft, 1);
+        cameraDirection = yawMatrix * glm::vec4(cameraDirection, 1);
+
+        pitch = 0;
+        yaw = 0;
+
+
+        
 
         glm::mat4 model = glm::mat4(1.0f);
         model = glm::rotate(angle, rotAxis);
-        angle += 0.0003f;
+        //angle += 0.0003f;
         //angle = 180;
         //model = glm::scale(glm::mat4(1.0f), 
         //               glm::vec3(1000.0f, 1000.0f, 1000.0f));
@@ -373,6 +397,12 @@ void EclipseMap::Render(const char *coloredTexturePath, const char *greyTextureP
 void EclipseMap::handleKeyPress(GLFWwindow *window) {
     if (glfwGetKey(window, GLFW_KEY_ESCAPE) == GLFW_PRESS) {
         glfwSetWindowShouldClose(window, GLFW_TRUE);
+    }
+    if (glfwGetKey(window, GLFW_KEY_A) == GLFW_PRESS) {
+        yaw += 0.05;
+    }
+    if (glfwGetKey(window, GLFW_KEY_D) == GLFW_PRESS) {
+        yaw -= 0.05;
     }
 
 }
