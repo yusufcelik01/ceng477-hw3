@@ -37,5 +37,6 @@ void main()
     vec3 spec = vec3(0, 0, 0);
 
     FragColor = vec4(ambient+diffuse+spec, 1.0f);
+    FragColor = vec4(0.55f, 0.0f, 1.0f, 1.f, );
 
 }

@@ -63,6 +63,7 @@ void main()
 
     FragColor = vec4(ambient+diffuse+spec, 1.0f);
     FragColor = texture(TexColor, data.TexCoord);
+    //FragColor = vec4(0.55f, 0.0f, 1.0f, 1.f);
 
     //if(NdotL > 1){
     //    FragColor = vec4(1.0f, 0.0f, 0.0f, 1.0f); 
