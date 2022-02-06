@@ -98,26 +98,28 @@ void createSphereArrays(vertex* vertexArray, vector<triangle>& indexArray,
     
     for(size_t i=1; i < horizontalSplitCount; i++){
         size_t index = (verticalSplitCount -1) *i + 2;
+        triangles->push_back(triangle(0, index, index- (verticalSplitCount-1)));
+
         if(i == horizontalSplitCount-1){
             triangles->push_back(triangle(0, 2, index));
             //TODO
             triangles->push_back(triangle(index+verticalSplitCount -2, verticalSplitCount, 1));
         } 
-        triangles->push_back(triangle(0, index, index- (verticalSplitCount-1)));
-
         index--;//for south pole
         triangles->push_back(triangle(index, index + (verticalSplitCount-1), 1));
     }
+    triangle t = (*triangles)[triangles->size()-2];
+    cout <<  t.vertex1 << " " << t.vertex2 << " " << t.vertex3 << endl;
 
     for(size_t i=1; i <horizontalSplitCount; i++){
         size_t index = i* (verticalSplitCount-1) +2;
-        for(size_t j=1; j< verticalSplitCount; j++){
+        for(size_t j=1; j< verticalSplitCount-1; j++){
             triangles->push_back(triangle(index, index+1, index-(verticalSplitCount-1)));
             triangles->push_back(triangle(index+1, index-verticalSplitCount+2,index- verticalSplitCount +1));
 
             if(i== horizontalSplitCount-1){
-                triangles->push_back(triangle(j, j+1, index));
-                triangles->push_back(triangle(j+1, index+1, index));
+                triangles->push_back(triangle(1+ j, j+2, index));
+                triangles->push_back(triangle(j+2, index+1, index));
                 //cout << "edge case meridian \n";
             }
         
@@ -258,6 +260,7 @@ void EclipseMap::Render(const char *coloredTexturePath, const char *greyTextureP
     lightPosition_location  = glGetUniformLocation(worldShaderID, "lightPosition");
     cameraPosition_location  = glGetUniformLocation(worldShaderID, "cameraPosition");
 
+    glm::vec3 lightPosition = glm::vec3(0.f, 4000.f, 0.f);
     //GLuint VAO;
 
 
@@ -278,7 +281,7 @@ void EclipseMap::Render(const char *coloredTexturePath, const char *greyTextureP
 
         glClearStencil(0);
         glClearDepth(1.0f);
-        glClearColor(0, 0.0f, 0, 1);
+        glClearColor(1.0f, 0.0f, 0, 1);
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
 
 
@@ -322,6 +325,7 @@ void EclipseMap::Render(const char *coloredTexturePath, const char *greyTextureP
         glm::mat4 model = glm::mat4(1.0f);
         model = glm::rotate(earthRotationAngle, rotAxis);
         earthRotationAngle += 0.5/horizontalSplitCount;
+        model = glm::rotate(180.f, rotAxis);
 
 
         glm::mat4 view = glm::lookAt(
@@ -371,7 +375,6 @@ void EclipseMap::Render(const char *coloredTexturePath, const char *greyTextureP
         glUniform1f(heightFactor_location, heightFactor);
         glUniform3fv(cameraPosition_location, 1, &cameraPosition[0]);
 
-        glm::vec3 lightPosition = glm::vec3(0.f, 4000.f, 0.f);
         glUniform3fv(lightPosition_location, 1, &lightPosition[0]);
         //cout << "ERROR" << glGetError() << endl;
         
@@ -391,7 +394,9 @@ void EclipseMap::Render(const char *coloredTexturePath, const char *greyTextureP
 
         glBindVertexArray(VAO);
         glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBO);
-        glDrawElements(GL_TRIANGLES, indices.size()*3, GL_UNSIGNED_INT, 0);
+        glDrawElements(GL_TRIANGLES, indices.size()*3, GL_UNSIGNED_INT, 0);//TODO
+        //glDrawElements(GL_TRIANGLES, 500*3 + 0*250*3 - 3, GL_UNSIGNED_INT, 0);
+        //glDrawElements(GL_TRIANGLES, indices.size()*3- 10000, GL_UNSIGNED_INT, 0);
 
         //cout << "triangles drawn: " << indices.size() << endl;
 

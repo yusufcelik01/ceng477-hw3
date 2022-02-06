@@ -42,9 +42,7 @@ void main()
     float NdotH = dot(halfVector, data.Normal);
 
     vec4 pixelColor = texture(TexColor, data.TexCoord);
-    diffuseReflectenceCoefficient.x = pixelColor.x;
-    diffuseReflectenceCoefficient.y = pixelColor.y;
-    diffuseReflectenceCoefficient.z = pixelColor.z;
+    diffuseReflectenceCoefficient = pixelColor.xyz;
 
 
 
@@ -64,12 +62,12 @@ void main()
 
 
     FragColor = vec4(ambient+diffuse+spec, 1.0f);
-    //FragColor = texture(TexColor, data.TexCoord);
+    FragColor = texture(TexColor, data.TexCoord);
 
-    //if(NdotL < 0){
+    //if(NdotL > 1){
     //    FragColor = vec4(1.0f, 0.0f, 0.0f, 1.0f); 
     //}
-    //if(NdotH < 0){
+    //if(NdotH > 1){
     //    FragColor = vec4(1.0f, 1.0f, 0.0f, 1.0f); 
     //}
 }

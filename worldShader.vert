@@ -37,6 +37,7 @@ void main()
     
     vec4 heightMapValue = texture(TexGrey, VertexTex);
     vec3 vertexHeight = VertexNormal*heightFactor* heightMapValue.r;
+    vertexHeight = vec3(0.0f, 0.f, 0.f);
     vec3 tempCoord = VertexPosition + vertexHeight;
 
 
@@ -45,7 +46,7 @@ void main()
     
 
         
-    data.Normal = normalize(VertexNormal);
+    data.Normal = normalize((ModelMatrix* vec4(VertexNormal, 0.f)).xyz);
     data.TexCoord = VertexTex;
 
 
