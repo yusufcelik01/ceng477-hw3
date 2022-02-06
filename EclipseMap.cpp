@@ -58,18 +58,8 @@ void createSphereArrays(vertex* vertexArray, vector<triangle>& indexArray,
     vertexArray[1].texture = glm::vec2(0.f, 1.f);
 
     size_t index = 2;
-    //for(int i=0 ; i < verticalSplitCount; i++){
-    //    double beta = PI * ((double)i/ verticalSplitCount);
-    //    for(int j=1; j< horizontalSplitCount; j++){
-    //        double alpha = 2*PI * ((double)j/ horizontalSplitCount); 
-    //        glm::vec3 ver(radius*sin(beta)*cos(alpha), 
-    //                            radius*sin(beta) * sin(alpha),
-    //                            radius*cos(beta));        
-    //        vertexArray[index++].position = ver;
-    //    }
-    //}
 
-    for(int i=0; i < horizontalSplitCount; i++){// for each meridian
+    for(int i=0; i <= horizontalSplitCount; i++){// for each meridian
         double alpha = 2*PI * ((double)i /horizontalSplitCount);
         for(int j=1; j < verticalSplitCount; j++){
             double beta = PI * ((double)j/verticalSplitCount);
@@ -96,11 +86,11 @@ void createSphereArrays(vertex* vertexArray, vector<triangle>& indexArray,
 
     vector<triangle>* triangles = new vector<triangle>;
     
-    for(size_t i=1; i < horizontalSplitCount; i++){
+    for(size_t i=1; i <= horizontalSplitCount; i++){
         size_t index = (verticalSplitCount -1) *i + 2;
         triangles->push_back(triangle(0, index, index- (verticalSplitCount-1)));
 
-        if(i == horizontalSplitCount-1){
+        if(false && i == horizontalSplitCount-1){
             triangles->push_back(triangle(0, 2, index));
             //TODO
             triangles->push_back(triangle(index+verticalSplitCount -2, verticalSplitCount, 1));
@@ -111,20 +101,20 @@ void createSphereArrays(vertex* vertexArray, vector<triangle>& indexArray,
     //triangle t = (*triangles)[triangles->size()-2];
     //cout <<  t.vertex1 << " " << t.vertex2 << " " << t.vertex3 << endl;
 
-    for(size_t i=1; i <horizontalSplitCount; i++){
+    for(size_t i=1; i <=horizontalSplitCount; i++){
         size_t index = i* (verticalSplitCount-1) +2;
         for(size_t j=1; j< verticalSplitCount-1; j++){
             triangles->push_back(triangle(index, index+1, index-(verticalSplitCount-1)));
             triangles->push_back(triangle(index+1, index-verticalSplitCount+2,index- verticalSplitCount +1));
 
-            if(i== horizontalSplitCount-1){
+            if(false && i== horizontalSplitCount-1){//TODO
                 triangles->push_back(triangle(1+ j, j+2, index));
                 triangles->push_back(triangle(j+2, index+1, index));
                 //cout << "edge case meridian \n";
-                triangle t = (*triangles)[triangles->size()-2];
-                cout <<  t.vertex1 << " " << t.vertex2 << " " << t.vertex3 << endl;
-                t = (*triangles)[triangles->size()-1];
-                cout <<  t.vertex1 << " " << t.vertex2 << " " << t.vertex3 << endl;
+                //triangle t = (*triangles)[triangles->size()-2];
+                //cout <<  t.vertex1 << " " << t.vertex2 << " " << t.vertex3 << endl;
+                //t = (*triangles)[triangles->size()-1];
+                //cout <<  t.vertex1 << " " << t.vertex2 << " " << t.vertex3 << endl;
             }
         
             index++;
@@ -163,7 +153,8 @@ void EclipseMap::Render(const char *coloredTexturePath, const char *greyTextureP
     initGreyTexture(greyTexturePath, worldShaderID);
 
     // TODO: Set worldVertices
-    size_t numberOfEarthVertices = (verticalSplitCount -1) *horizontalSplitCount  + 2;
+    //size_t numberOfEarthVertices = (verticalSplitCount -1) *horizontalSplitCount  + 2;
+    size_t numberOfEarthVertices = (verticalSplitCount -1) *(horizontalSplitCount +1 )+ 2;
     vertex earthVertices[numberOfEarthVertices];
     //triangle* indices = NULL;
     vector<triangle> indices;
@@ -330,7 +321,7 @@ void EclipseMap::Render(const char *coloredTexturePath, const char *greyTextureP
         glm::mat4 model = glm::mat4(1.0f);
         model = glm::rotate(earthRotationAngle, rotAxis);
         earthRotationAngle += 0.5/horizontalSplitCount;
-        model = glm::rotate(0.f, rotAxis);
+        //model = glm::rotate(0.f, rotAxis);
 
 
         glm::mat4 view = glm::lookAt(

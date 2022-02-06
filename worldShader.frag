@@ -6,10 +6,11 @@ in Data
     vec3 Normal;
     vec2 TexCoord;
 } data;
-in vec3 LightVector;
-in vec3 CameraVector;
+//in vec3 LightVector;
+//in vec3 CameraVector;
 
 uniform vec3 lightPosition;
+uniform vec3 cameraPosition;
 uniform sampler2D TexColor;
 uniform sampler2D MoonTexColor;
 uniform sampler2D TexGrey;
@@ -27,26 +28,38 @@ out vec4 FragColor;
 
 vec3 ambientReflectenceCoefficient = vec3(0.5f, 0.5f, 0.5f);
 vec3 ambientLightColor = vec3(0.6f, 0.6f, 0.6f);
+
+vec3 diffuseReflectenceCoefficient= vec3(1.0f, 1.0f, 1.0f);
+vec3 diffuseLightColor = vec3(1.0f, 1.0f, 1.0f);
+
 vec3 specularReflectenceCoefficient = vec3(1.0f, 1.0f, 1.0f);
 vec3 specularLightColor = vec3(1.0f, 1.0f, 1.0f);
 float SpecularExponent = 10;
-vec3 diffuseReflectenceCoefficient= vec3(1.0f);
-vec3 diffuseLightColor = vec3(1.0f, 1.0f, 1.0f);
 
 void main()
 {
     // Calculate texture coordinate based on data.TexCoord
+    vec3 LightVector;
+    vec3 CameraVector;
+    vec3 N = normalize(data.Normal);
+
+    LightVector = lightPosition - data.Position;
+    LightVector = normalize(LightVector);
+    CameraVector = cameraPosition - data.Position;
+    CameraVector = normalize(CameraVector);
     
     vec3 halfVector = normalize(LightVector + CameraVector);
-    float NdotL = dot(LightVector, data.Normal);
-    float NdotH = dot(halfVector, data.Normal);
+    float NdotL = dot(LightVector, N);
+    float NdotH = dot(halfVector, N);
 
     vec4 pixelColor = texture(TexColor, data.TexCoord);
     diffuseReflectenceCoefficient = pixelColor.xyz;
 
 
 
+
     vec3 ambient = ambientLightColor * ambientReflectenceCoefficient;
+
     vec3 diffuse = diffuseLightColor * diffuseReflectenceCoefficient
                         * max(0, NdotL);
 
@@ -62,7 +75,8 @@ void main()
 
 
     FragColor = vec4(ambient+diffuse+spec, 1.0f);
-    FragColor = texture(TexColor, data.TexCoord);
+    FragColor = vec4(pixelColor.xyz * FragColor.xyz, 1.0f);
+    //FragColor = texture(TexColor, data.TexCoord);
     //FragColor = vec4(0.55f, 0.0f, 1.0f, 1.f);
 
     //if(NdotL > 1){
