@@ -503,10 +503,10 @@ void EclipseMap::handleKeyPress(GLFWwindow *window) {
         yaw -= 0.05*deltaTime;
     }
     if (glfwGetKey(window, GLFW_KEY_W) == GLFW_PRESS) {
-        pitch += 0.05*deltaTime;
+        pitch -= 0.05*deltaTime;
     }
     if (glfwGetKey(window, GLFW_KEY_S) == GLFW_PRESS) {
-        pitch -= 0.05*deltaTime;
+        pitch += 0.05*deltaTime;
     }
     //camera speed
     if (glfwGetKey(window, GLFW_KEY_Y) == GLFW_PRESS) {
