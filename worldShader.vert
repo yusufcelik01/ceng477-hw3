@@ -40,14 +40,11 @@ void main()
     vec3 tempCoord = VertexPosition + vertexHeight;
 
 
-    data.Position = (ModelMatrix * vec4(tempCoord, 1.0f)).xyz;
     gl_Position = MVP * vec4(tempCoord, 1.0);
     
-
-        
+    data.Position = (ModelMatrix * vec4(tempCoord, 1.0f)).xyz;
     data.Normal = normalize((ModelMatrix* vec4(VertexNormal, 0.f)).xyz);
     data.TexCoord = VertexTex;
-
 
     LightVector = lightPosition - data.Position;
     LightVector = normalize(LightVector);

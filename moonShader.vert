@@ -42,12 +42,16 @@ void main()
    // set gl_Position variable correctly to give the transformed vertex position
 
 
-    gl_Position = vec4(1.0f, 1.0f, 1.0f, 1.0f); // this is a placeholder. It does not correctly set the position
 
     gl_Position = MVP * vec4(VertexPosition, 1.0f);
-    //gl_Position = vec4(VertexPosition, 1.0f); 
 
     data.Position = (ModelMatrix * vec4(VertexPosition, 1.0f)).xyz;
+    data.Normal = normalize((ModelMatrix* vec4(VertexNormal, 0.0f)).xyz);
     data.TexCoord = VertexTex;
+
+    LightVector = lightPosition - data.Position;
+    LightVector = normalize(LightVector);
+    CameraVector = cameraPosition - data.Position;
+    CameraVector = normalize(CameraVector);
 
 }

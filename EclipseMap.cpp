@@ -280,7 +280,7 @@ void EclipseMap::Render(const char *coloredTexturePath, const char *greyTextureP
     float earthRotationAngle = 0;
 
     glm::vec3 moonRotAxis = glm::vec3(0.f, 0.f, 1.f);
-    glm::vec3 moonOrbitAxis = glm::vec3(0.f, 0.f, 1.f);
+    glm::vec3 moonOrbitAxis = glm::vec3(0.f, 0.f, -1.f);
     float moonRotationAngle = 0;
     float moonOrbitAngle = 0;
 
