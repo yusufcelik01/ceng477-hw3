@@ -234,10 +234,10 @@ void EclipseMap::Render(const char *coloredTexturePath, const char *greyTextureP
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBO);
     glBufferData(GL_ELEMENT_ARRAY_BUFFER, indices.size()*sizeof(triangle) , &indices[0], GL_STATIC_DRAW);
 
-    cout << "sizeof(earthVertices)= " << sizeof(earthVertices) << endl;
-    cout << "sizeof(vertex)" << sizeof(vertex) << endl;
-    cout << "numberOfEarthVertices" << numberOfEarthVertices << endl;
-    cout << "indices.size()" << indices.size() << endl;
+    //cout << "sizeof(earthVertices)= " << sizeof(earthVertices) << endl;
+    //cout << "sizeof(vertex)" << sizeof(vertex) << endl;
+    //cout << "numberOfEarthVertices" << numberOfEarthVertices << endl;
+    //cout << "indices.size()" << indices.size() << endl;
 
 
 
