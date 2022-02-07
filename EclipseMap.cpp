@@ -156,10 +156,14 @@ void EclipseMap::Render(const char *coloredTexturePath, const char *greyTextureP
     //size_t numberOfEarthVertices = (verticalSplitCount -1) *horizontalSplitCount  + 2;
     size_t numberOfEarthVertices = (verticalSplitCount -1) *(horizontalSplitCount +1 )+ 2;
     vertex earthVertices[numberOfEarthVertices];
+    vertex moonVertices[numberOfEarthVertices];
     //triangle* indices = NULL;
     vector<triangle> indices;
+    vector<triangle> moonIndices;
 
     createSphereArrays( earthVertices, indices, radius, glm::vec3(0.f, 0.f, 0.f), glm::vec3(0.f, 0.f, -1.f),
+                            horizontalSplitCount, verticalSplitCount);
+    createSphereArrays( moonVertices, moonIndices, moonRadius, glm::vec3(0.f, 0.f, 0.f), glm::vec3(0.f, 0.f, -1.f),
                             horizontalSplitCount, verticalSplitCount);
 
     //for(size_t k=0; k< numberOfEarthVertices; k++){
@@ -172,64 +176,69 @@ void EclipseMap::Render(const char *coloredTexturePath, const char *greyTextureP
     //    cout << temps.vertex1 << " " << temps.vertex2 << " " << temps.vertex3 << endl;
     //}
 
+    // moon buffer intilization
 
-    //vertex earthVertices[3];
-    ////earthVertices[0].position = glm::vec3(-0.5f, -0.5f, 0.0f);
-    ////earthVertices[1].position = glm::vec3( 0.5f, -0.5f, 0.0f);
-    ////earthVertices[2].position = glm::vec3( 0.0f,  0.5f, 0.0f);
+    glGenVertexArrays(1, &moonVAO);
+    glGenBuffers(1, &moonVBO);
+    glGenBuffers(1, &moonEBO);
+    
+    glBindVertexArray(moonVAO);
+    
+    glBindBuffer(GL_ARRAY_BUFFER, moonVBO);
+    glBufferData(GL_ARRAY_BUFFER, sizeof(moonVertices), moonVertices, GL_STATIC_DRAW);
 
-    //earthVertices[0].position = glm::vec3(-1000.f, -1000.f, 0.0f);
-    //earthVertices[1].position = glm::vec3( 1000.f, -1000.f, 0.0f);
-    //earthVertices[2].position = glm::vec3( 0.0f,  1000.f, 0.0f);
+    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, moonEBO);
+    glBufferData(GL_ELEMENT_ARRAY_BUFFER, moonIndices.size()*sizeof(triangle), &moonIndices[0], GL_STATIC_DRAW);
 
-    //earthVertices[0].texture = glm::vec2(0.0f, 0.0f);
-    //earthVertices[1].texture = glm::vec2(1.0f, 0.0f);
-    //earthVertices[2].texture = glm::vec2(0.5f, 1.0f);
+    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(vertex), (void*) 0);
+    glEnableVertexAttribArray(0);
 
-    //
+    glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, sizeof(vertex), (void*) (3*sizeof(float)));
+    glEnableVertexAttribArray(1);
 
-    //triangle indices[1];
-    //indices[0].vertex1 = 0;
-    //indices[0].vertex2 = 1;
-    //indices[0].vertex3 = 2;
+    glVertexAttribPointer(2, 3, GL_FLOAT, GL_FALSE, sizeof(vertex), (void*) (6*sizeof(float)));
+    glEnableVertexAttribArray(2);
 
+    GLuint moon_MVP_location, moon_Model_location;
+    GLuint moonTexColor_location;
+    GLuint moonLight_position, moonCamera_position;
+
+    moon_Model_location = glGetUniformLocation(moonShaderID, "ModelMatrix");
+    moon_MVP_location = glGetUniformLocation(moonShaderID, "MVP");
+    moonTexColor_location = glGetUniformLocation(moonShaderID, "MoonTexColor");
+    
+    moonTexColor_location = glGetUniformLocation(moonShaderID, "MoonTexColor");
+
+    moonLight_position  = glGetUniformLocation(moonShaderID, "lightPosition");
+    moonCamera_position  = glGetUniformLocation(moonShaderID, "cameraPosition");
+    
+
+
+
+    /* ##############  EARTH VARIABLES AND BUFFES  #################### */
     //GLuint VBO;
+    //Earth buffer initilazitons
     glGenVertexArrays(1, &VAO);
     glGenBuffers(1, &VBO);
     glGenBuffers(1, &EBO);
 
+
     glBindVertexArray(VAO);
 
-    //glBindBuffer(GL_ARRAY_BUFFER, VBO);
-    //glBufferData(GL_ARRAY_BUFFER, sizeof(earthVertices), earthVertices, GL_STATIC_DRAW);
-
-    //glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBO);
-    //glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(indices), &indices[0], GL_STATIC_DRAW);
-
-
-
-
-    //glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(earthVertices[0]), (void*) 0);
-    //glEnableVertexAttribArray(0);
-
-    //glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, sizeof(earthVertices[0]), (void*) (3*sizeof(float)));
-    //glEnableVertexAttribArray(1);
-
-    //glVertexAttribPointer(2, 3, GL_FLOAT, GL_FALSE, sizeof(earthVertices[0]), (void*) (6*sizeof(float)));
-    //glEnableVertexAttribArray(2);
 
     ////////////////////////////
     glBindBuffer(GL_ARRAY_BUFFER, VBO);
-    //glBufferData(GL_ARRAY_BUFFER, sizeof(vertex)*((horizontalSplitCount-1) * verticalSplitCount +2), earthVertices, GL_STATIC_DRAW);
     glBufferData(GL_ARRAY_BUFFER, sizeof(earthVertices), earthVertices, GL_STATIC_DRAW);
+    //glBufferData(GL_ARRAY_BUFFER, sizeof(vertex)*((horizontalSplitCount-1) * verticalSplitCount +2), earthVertices, GL_STATIC_DRAW);
+
+    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBO);
+    glBufferData(GL_ELEMENT_ARRAY_BUFFER, indices.size()*sizeof(triangle) , &indices[0], GL_STATIC_DRAW);
 
     cout << "sizeof(earthVertices)= " << sizeof(earthVertices) << endl;
     cout << "sizeof(vertex)" << sizeof(vertex) << endl;
     cout << "numberOfEarthVertices" << numberOfEarthVertices << endl;
     cout << "indices.size()" << indices.size() << endl;
 
-    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBO);
-    glBufferData(GL_ELEMENT_ARRAY_BUFFER, indices.size()*sizeof(triangle) , &indices[0], GL_STATIC_DRAW);
 
 
 
@@ -314,16 +323,6 @@ void EclipseMap::Render(const char *coloredTexturePath, const char *greyTextureP
         pitch = 0;
         yaw = 0;
 
-
-        
-
-        // Calculate MVP
-        glm::mat4 model = glm::mat4(1.0f);
-        model = glm::rotate(earthRotationAngle, rotAxis);
-        earthRotationAngle += 0.5/horizontalSplitCount;
-        //model = glm::rotate(0.f, rotAxis);
-
-
         glm::mat4 view = glm::lookAt(
                 cameraPosition,
                 cameraPosition + cameraDirection,
@@ -338,22 +337,64 @@ void EclipseMap::Render(const char *coloredTexturePath, const char *greyTextureP
                 far
         );
 
+
+        //CALCULATE MOON MATRICES
+
+        glm::mat4 moonModel = glm::mat4(1.0f);
+        moonModel = glm::translate(glm::mat4(1.0f),
+                             glm::vec3(0.f, 2600.f, 0.f));
+
+        glm::mat4 moonMVP = projection * view * moonModel;
+
+
+        
+
+        // Calculate MVP
+        glm::mat4 model = glm::mat4(1.0f);
+        model = glm::rotate(earthRotationAngle, rotAxis);
+        earthRotationAngle += 0.5/horizontalSplitCount;
+        //model = glm::rotate(0.f, rotAxis);
+
+
+
         glm::mat4 MVP = projection * view * model;
         
         
         // TODO: Update uniform variables at every frame
 
+        glUseProgram(moonShaderID);
+        
+        glUniform1i(moonTexColor_location, 0);
 
+        glUniformMatrix4fv(moon_MVP_location, 1, GL_FALSE, &moonMVP[0][0]);
+        glUniformMatrix4fv(moon_Model_location, 1, GL_FALSE, &moonModel[0][0]);
 
+        glUniform3fv(moonCamera_position, 1, &cameraPosition[0]);
+        glUniform3fv(moonLight_position, 1, &cameraPosition[0]);
 
 
         // TODO TODO TODO TODO TODO TODO
         
         // TODO: Bind moon vertex array        
+        glActiveTexture(GL_TEXTURE0 + 0); // Texture unit 0
+        glBindTexture(GL_TEXTURE_2D, moonTextureColor);
 
+        glBindVertexArray(moonVAO);
+        glBindBuffer(GL_ARRAY_BUFFER, moonVBO);
+        glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, moonEBO);
+
+        glDrawElements(GL_TRIANGLES, moonIndices.size()*3, GL_UNSIGNED_INT, 0);
+
+
+        
         // TODO: Draw moon object
         
         /*************************/
+        
+
+
+
+
 
         // TODO: Use worldShaderID program
         glUseProgram(worldShaderID);
@@ -389,6 +430,7 @@ void EclipseMap::Render(const char *coloredTexturePath, const char *greyTextureP
         glBindTexture(GL_TEXTURE_2D, textureGrey);
 
         glBindVertexArray(VAO);
+        glBindBuffer(GL_ARRAY_BUFFER, VBO);
         glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBO);
         //glPolygonMode( GL_FRONT_AND_BACK, GL_LINE );
         glDrawElements(GL_TRIANGLES, indices.size()*3, GL_UNSIGNED_INT, 0);//TODO

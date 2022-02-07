@@ -10,6 +10,7 @@ uniform vec3 cameraPosition;
 uniform mat4 ProjectionMatrix;
 uniform mat4 ViewMatrix;
 uniform mat4 NormalMatrix;
+uniform mat4 ModelMatrix;
 uniform mat4 MVP;
 
 uniform sampler2D TexColor;
@@ -41,6 +42,12 @@ void main()
    // set gl_Position variable correctly to give the transformed vertex position
 
 
-    gl_Position = vec4(0,0,0,0); // this is a placeholder. It does not correctly set the position
+    gl_Position = vec4(1.0f, 1.0f, 1.0f, 1.0f); // this is a placeholder. It does not correctly set the position
+
+    gl_Position = MVP * vec4(VertexPosition, 1.0f);
+    //gl_Position = vec4(VertexPosition, 1.0f); 
+
+    data.Position = (ModelMatrix * vec4(VertexPosition, 1.0f)).xyz;
+    data.TexCoord = VertexTex;
 
 }
