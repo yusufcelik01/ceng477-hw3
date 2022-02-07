@@ -278,9 +278,16 @@ void EclipseMap::Render(const char *coloredTexturePath, const char *greyTextureP
     // Main rendering loop
     glm::vec3 rotAxis = glm::vec3(0.f, 0.f, 1.f);
     float earthRotationAngle = 0;
+
+    glm::vec3 moonRotAxis = glm::vec3(0.f, 0.f, 1.f);
+    glm::vec3 moonOrbitAxis = glm::vec3(0.f, 0.f, 1.f);
+    float moonRotationAngle = 0;
+    float moonOrbitAngle = 0;
+
     yaw = 0;
     pitch = 0;
     do {
+        //glfwGetFramebufferSize(window, &screenWidth, &screenHeight);
         glViewport(0, 0, screenWidth, screenHeight);
 
         glClearStencil(0);
@@ -339,13 +346,22 @@ void EclipseMap::Render(const char *coloredTexturePath, const char *greyTextureP
 
 
         //CALCULATE MOON MATRICES
-
         glm::mat4 moonModel = glm::mat4(1.0f);
-        moonModel = glm::translate(glm::mat4(1.0f),
+
+        glm::mat4 moonRotationMatrix = glm::rotate(moonRotationAngle, moonRotAxis);
+
+        glm::mat4 moonOrbitMatrix = glm::rotate(moonOrbitAngle, moonOrbitAxis);
+
+        glm::mat4 moonTranslationMatrix = glm::translate(glm::mat4(1.0f),
                              glm::vec3(0.f, 2600.f, 0.f));
+
+
+        moonModel = moonOrbitMatrix * moonTranslationMatrix * moonRotationMatrix;
 
         glm::mat4 moonMVP = projection * view * moonModel;
 
+        moonRotationAngle += 0.5/horizontalSplitCount;
+        moonOrbitAngle += 0.02 * 0.05;
 
         
 
