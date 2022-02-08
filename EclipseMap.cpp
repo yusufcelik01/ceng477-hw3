@@ -361,15 +361,15 @@ void EclipseMap::Render(const char *coloredTexturePath, const char *greyTextureP
 
         glm::mat4 moonMVP = projection * view * moonModel;
 
-        moonRotationAngle += 0.5/horizontalSplitCount * 3;
-        moonOrbitAngle += 0.02 ;//* 0.05;
+        moonRotationAngle += 0.5/horizontalSplitCount * 3*deltaTime * 3;
+        moonOrbitAngle += 0.02 *deltaTime * 3;//* 0.05;
 
         
 
         // Calculate MVP
         glm::mat4 model = glm::mat4(1.0f);
         model = glm::rotate(earthRotationAngle, rotAxis);
-        earthRotationAngle += 0.5/horizontalSplitCount * 4;
+        earthRotationAngle += 0.5/horizontalSplitCount * 4*deltaTime * 3;
         //model = glm::rotate(0.f, rotAxis);
 
 
@@ -469,6 +469,8 @@ void EclipseMap::Render(const char *coloredTexturePath, const char *greyTextureP
         deltaTime = (currentTime - lastTime) * 20;
         lastTime = currentTime;
         currentTime = glfwGetTime();
+
+        cout << "delta time :" << deltaTime << endl;
     } while (!glfwWindowShouldClose(window));
 
     // Delete buffers
