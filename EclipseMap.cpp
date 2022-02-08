@@ -500,6 +500,7 @@ void EclipseMap::handleFullScreenToggle() {
             pKeyPressed = true;
             displayFormat = fullScreen;
 
+            //prevWindowWidth = screenWidth;
             glfwSetWindowMonitor(window, monitor, 1, 31, screenWidth, screenHeight, mode->refreshRate);//TODO
         }
     }

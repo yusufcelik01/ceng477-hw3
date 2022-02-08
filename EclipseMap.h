@@ -33,6 +33,12 @@ private:
     int screenWidth = defaultScreenWidth;
     int screenHeight = defaultScreenHeight;
     int displayFormat = displayFormatOptions::windowed;
+    
+    int xpos = 1;
+    int ypos = 31;
+    int prevWindowWidth = screenWidth;
+    int prevWindowHeight = screenHeight;
+
     // CAMERA SETTINGS
     float projectionAngle = 45;
     float aspectRatio = 1;
