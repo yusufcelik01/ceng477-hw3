@@ -39,6 +39,11 @@ private:
     int prevWindowWidth = screenWidth;
     int prevWindowHeight = screenHeight;
 
+    int monitorWidth;
+    int monitorHeight;
+    int monitorXpos;
+    int monitorYpos;
+
     // CAMERA SETTINGS
     float projectionAngle = 45;
     float aspectRatio = 1;

@@ -500,7 +500,14 @@ void EclipseMap::handleFullScreenToggle() {
             pKeyPressed = true;
             displayFormat = fullScreen;
 
-            //prevWindowWidth = screenWidth;
+            glfwGetWindowSize(window, &prevWindowWidth, &prevWindowHeight);
+            glfwGetWindowPos(window, &xpos, &ypos);
+
+            //glfwGetMonitorWorkarea(monitor, &monitorXpos, &monitorYpos, &monitorWidth, &monitorHeight);
+            screenWidth = monitorWidth;
+            screenHeight = monitorHeight;
+
+
             glfwSetWindowMonitor(window, monitor, 1, 31, screenWidth, screenHeight, mode->refreshRate);//TODO
         }
     }
@@ -514,7 +521,18 @@ void EclipseMap::handleFullScreenToggle() {
             pKeyPressed = true;
             displayFormat = windowed;
 
-            glfwSetWindowMonitor(window, NULL, 1, 31, screenWidth, screenHeight, mode->refreshRate);//TODO
+            //glfwSetWindowMonitor(window, NULL, 1, 31, screenWidth, screenHeight, mode->refreshRate);//TODO
+
+            screenWidth  = prevWindowWidth;
+            screenHeight = prevWindowHeight;
+
+            //cout << "xpos: " << xpos <<" ypos: "<< ypos << endl;
+            //if(xpos == NULL)
+            //if(ypos == NULL)
+            //{xpos = 1;}
+            //{ypos = 31;}
+
+            glfwSetWindowMonitor(window, NULL, xpos, ypos, screenWidth, screenHeight, mode->refreshRate);//TODO
         }
     } 
     else { //pKeyPressed == true && displayFormat == windowed
@@ -589,6 +607,13 @@ GLFWwindow *EclipseMap::openWindow(const char *windowName, int width, int height
 
     monitor = glfwGetPrimaryMonitor();
     mode = glfwGetVideoMode(monitor);
+
+    //TODO
+    monitorWidth = mode->width;
+    monitorHeight = mode->height;
+
+    //TODO
+
     glfwWindowHint(GLFW_SAMPLES, 4);
     glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
     glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
