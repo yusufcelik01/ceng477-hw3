@@ -361,15 +361,15 @@ void EclipseMap::Render(const char *coloredTexturePath, const char *greyTextureP
 
         glm::mat4 moonMVP = projection * view * moonModel;
 
-        moonRotationAngle += 0.5/horizontalSplitCount;
-        moonOrbitAngle += 0.02 * 0.05;
+        moonRotationAngle += 0.5/horizontalSplitCount * 3;
+        moonOrbitAngle += 0.02 ;//* 0.05;
 
         
 
         // Calculate MVP
         glm::mat4 model = glm::mat4(1.0f);
         model = glm::rotate(earthRotationAngle, rotAxis);
-        earthRotationAngle += 0.5/horizontalSplitCount;
+        earthRotationAngle += 0.5/horizontalSplitCount * 4;
         //model = glm::rotate(0.f, rotAxis);
 
 
@@ -547,10 +547,10 @@ void EclipseMap::handleKeyPress(GLFWwindow *window) {
     }
     //camera speed
     if (glfwGetKey(window, GLFW_KEY_Y) == GLFW_PRESS) {
-        speed += 0.01*deltaTime * 3;
+        speed += 0.01*deltaTime * 40;
     }
     if (glfwGetKey(window, GLFW_KEY_H) == GLFW_PRESS) {
-        speed -= 0.01*deltaTime * 3;
+        speed -= 0.01*deltaTime * 40;
     }
     if (glfwGetKey(window, GLFW_KEY_X) == GLFW_PRESS) {
         speed = 0;
