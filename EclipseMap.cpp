@@ -287,7 +287,8 @@ void EclipseMap::Render(const char *coloredTexturePath, const char *greyTextureP
     yaw = 0;
     pitch = 0;
     do {
-        //glfwGetFramebufferSize(window, &screenWidth, &screenHeight);
+        glfwGetFramebufferSize(window, &screenWidth, &screenHeight);
+        aspectRatio = (double)screenWidth/screenHeight;
         glViewport(0, 0, screenWidth, screenHeight);
 
         glClearStencil(0);
