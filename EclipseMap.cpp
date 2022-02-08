@@ -110,11 +110,6 @@ void createSphereArrays(vertex* vertexArray, vector<triangle>& indexArray,
             if(false && i== horizontalSplitCount-1){//TODO
                 triangles->push_back(triangle(1+ j, j+2, index));
                 triangles->push_back(triangle(j+2, index+1, index));
-                //cout << "edge case meridian \n";
-                //triangle t = (*triangles)[triangles->size()-2];
-                //cout <<  t.vertex1 << " " << t.vertex2 << " " << t.vertex3 << endl;
-                //t = (*triangles)[triangles->size()-1];
-                //cout <<  t.vertex1 << " " << t.vertex2 << " " << t.vertex3 << endl;
             }
         
             index++;
@@ -229,15 +224,10 @@ void EclipseMap::Render(const char *coloredTexturePath, const char *greyTextureP
     ////////////////////////////
     glBindBuffer(GL_ARRAY_BUFFER, VBO);
     glBufferData(GL_ARRAY_BUFFER, sizeof(earthVertices), earthVertices, GL_STATIC_DRAW);
-    //glBufferData(GL_ARRAY_BUFFER, sizeof(vertex)*((horizontalSplitCount-1) * verticalSplitCount +2), earthVertices, GL_STATIC_DRAW);
 
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBO);
     glBufferData(GL_ELEMENT_ARRAY_BUFFER, indices.size()*sizeof(triangle) , &indices[0], GL_STATIC_DRAW);
 
-    //cout << "sizeof(earthVertices)= " << sizeof(earthVertices) << endl;
-    //cout << "sizeof(vertex)" << sizeof(vertex) << endl;
-    //cout << "numberOfEarthVertices" << numberOfEarthVertices << endl;
-    //cout << "indices.size()" << indices.size() << endl;
 
 
 
@@ -266,7 +256,6 @@ void EclipseMap::Render(const char *coloredTexturePath, const char *greyTextureP
 
     glm::vec3 lightPosition = glm::vec3(0.f, 4000.f, 0.f);
     //GLuint VAO;
-
 
     //GLuint EBO;
 
@@ -409,10 +398,6 @@ void EclipseMap::Render(const char *coloredTexturePath, const char *greyTextureP
         /*************************/
         
 
-
-
-
-
         // TODO: Use worldShaderID program
         glUseProgram(worldShaderID);
         
@@ -430,9 +415,6 @@ void EclipseMap::Render(const char *coloredTexturePath, const char *greyTextureP
         glUniform3fv(cameraPosition_location, 1, &cameraPosition[0]);
 
         glUniform3fv(lightPosition_location, 1, &lightPosition[0]);
-        //cout << "ERROR" << glGetError() << endl;
-        
-
 
         
 
@@ -449,16 +431,8 @@ void EclipseMap::Render(const char *coloredTexturePath, const char *greyTextureP
         glBindVertexArray(VAO);
         glBindBuffer(GL_ARRAY_BUFFER, VBO);
         glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBO);
-        //glPolygonMode( GL_FRONT_AND_BACK, GL_LINE );
+
         glDrawElements(GL_TRIANGLES, indices.size()*3, GL_UNSIGNED_INT, 0);//TODO
-        //glDrawElements(GL_TRIANGLES, 500*3 + 0*250*3 - 3, GL_UNSIGNED_INT, 0);
-        //glDrawElements(GL_TRIANGLES, indices.size()*3- 10000, GL_UNSIGNED_INT, 0);
-
-        //cout << "triangles drawn: " << indices.size() << endl;
-
-        //cout << indices.size() << endl;//TODO debug
-        //cout << verticalSplitCount * ((horizontalSplitCount-2)*2 +2) <<endl;
-        //glDrawArrays(GL_TRIANGLES, 0, 3);
         
 
         // Swap buffers and poll events
@@ -470,7 +444,6 @@ void EclipseMap::Render(const char *coloredTexturePath, const char *greyTextureP
         lastTime = currentTime;
         currentTime = glfwGetTime();
 
-        cout << "delta time :" << deltaTime << endl;
     } while (!glfwWindowShouldClose(window));
 
     // Delete buffers
