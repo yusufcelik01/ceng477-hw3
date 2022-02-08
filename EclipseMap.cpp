@@ -488,6 +488,41 @@ void EclipseMap::Render(const char *coloredTexturePath, const char *greyTextureP
     glfwTerminate();
 }
 
+void EclipseMap::handleFullScreenToggle() {
+    /* 
+       notice that this function actually simulates a 
+       finite state machine
+     */
+    
+    if(pKeyPressed == false && displayFormat == windowed) {
+        if (glfwGetKey(window, GLFW_KEY_P) == GLFW_PRESS) {
+            pKeyPressed = true;
+            displayFormat = fullScreen;
+
+            glfwSetWindowMonitor(window, monitor, 1, 31, screenWidth, screenHeight, mode->refreshRate);//TODO
+        }
+    }
+    else if (pKeyPressed == true && displayFormat == fullScreen) {
+        if(glfwGetKey(window, GLFW_KEY_P) == GLFW_RELEASE) {
+            pKeyPressed = false;
+        }
+    }
+    else if (pKeyPressed == false && displayFormat == fullScreen) {
+        if(glfwGetKey(window, GLFW_KEY_P) == GLFW_PRESS) {
+            pKeyPressed = true;
+            displayFormat = windowed;
+
+            glfwSetWindowMonitor(window, NULL, 1, 31, screenWidth, screenHeight, mode->refreshRate);//TODO
+        }
+    } 
+    else { //pKeyPressed == true && displayFormat == windowed
+        if(glfwGetKey(window, GLFW_KEY_P) == GLFW_RELEASE) {
+            pKeyPressed = false;
+        }
+    }
+
+}
+
 void EclipseMap::handleKeyPress(GLFWwindow *window) {
     
     
@@ -539,6 +574,9 @@ void EclipseMap::handleKeyPress(GLFWwindow *window) {
     }
 
 
+    //handle full-screen toggle
+    handleFullScreenToggle();
+
 }
 
 GLFWwindow *EclipseMap::openWindow(const char *windowName, int width, int height) {
@@ -547,13 +585,14 @@ GLFWwindow *EclipseMap::openWindow(const char *windowName, int width, int height
         return 0;
     }
 
-    const GLFWvidmode *mode = glfwGetVideoMode(glfwGetPrimaryMonitor());
+    monitor = glfwGetPrimaryMonitor();
+    mode = glfwGetVideoMode(monitor);
     glfwWindowHint(GLFW_SAMPLES, 4);
     glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
     glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
     glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GL_TRUE);
     glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
-    GLFWwindow *window = glfwCreateWindow(width, height, windowName, NULL, NULL);
+    window = glfwCreateWindow(width, height, windowName, NULL, NULL);
     glfwSetWindowMonitor(window, NULL, 1, 31, screenWidth, screenHeight, mode->refreshRate);
 
     if (window == NULL) {

@@ -78,6 +78,10 @@ public:
     float moonImageWidth;
     float moonRadius = 162;
 
+    GLFWwindow* window = NULL;
+    GLFWmonitor* monitor;
+    const GLFWvidmode *mode;
+
     vector<float> worldVertices;
     vector<unsigned int> worldIndices;
 
@@ -89,6 +93,7 @@ public:
     void Render(const char *coloredTexturePath, const char *greyTexturePath, const char *moonTexturePath);
 
     void handleKeyPress(GLFWwindow *window);
+    void handleFullScreenToggle();
 
     void initColoredTexture(const char *filename, GLuint shader);
 
