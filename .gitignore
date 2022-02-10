@@ -11,3 +11,6 @@
 !*.vert
 !glm
 !glm/**/*
+!height_map.jpg
+!earth_texture_map.jpg
+!moon_texture_map.jpg
